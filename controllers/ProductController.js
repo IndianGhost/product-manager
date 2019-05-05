@@ -1,35 +1,55 @@
-/*
-    https://stackoverflow.com/questions/35091524/spring-cors-no-access-control-allow-origin-header-is-present
-
-    There is a problem to resolve later NO-ACCESS-CONTROL-ALLOW-ORIGIN
-*/
 appModule.controller('ProductController', function($scope, $window, $routeParams, $rootScope, $route, $http) {
     $scope.products = [];
-
+    
+    /* Read product */
     function init() {
-        $http.get('http://localhost:8080/products/').then(function(rep){
-            console.log(rep);
-            rep.forEach(element => {
+        
+        //GET Request to
+        var url = 'http://localhost:8080/products/';
+        
+        $http.get(url).then(function(rep){
+            for(var i=0; i<rep.data.length; i++){
                 $scope.products.push({
-                    id: element.id,
-                    designation: element.designation,
-                    unitPrice: element.unitPrice,
-                    availableQuantity: element.availableQuantity
+                    id: rep.data[i].id,
+                    designation: rep.data[i].designation,
+                    unitPrice: rep.data[i].unitPrice,
+                    availableQuantity: rep.data[i].availableQuantity
                 });
-            });
+            }
             $scope.$apply();
         });
     }
     init();
 
+    /* Create product */
     $scope.createProduct = function (product) {
+        
+        //POST Request to
+        var url = 'http://localhost:8080/products/';
+        
+        // Data
         $scope.product = {
             designation: product.designation,
             unitPrice: product.unitPrice,
             availableQuantity: product.availableQuantity
         };
+        var data = $scope.product;
         
-        //POST Request to http://localhost:8080/products/
+        // Config
+        var config = {
+            headers : {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
+            }
+        }
+        
+        $http.post(url, data, config)
+        .then(function(rep){
+            console.log('success: ', rep);
+            $window.location.href = '/products';
+        },
+        function(error){
+            console.log('fail: ', error);
+        });
     };
 
     $scope.updateProductInit = function() {
