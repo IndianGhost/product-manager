@@ -17,6 +17,8 @@ appModule.controller('ProductController', function($scope, $window, $routeParams
                 });
             }
             $scope.$apply();
+        }, function(error){
+            console.log('error: ', error);
         });
     }
     init();
@@ -38,13 +40,11 @@ appModule.controller('ProductController', function($scope, $window, $routeParams
         // Config
         var config = {
             headers : {
-                'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
+                'Content-Type': 'application/json;charset=utf-8;'
             }
         }
-        
         $http.post(url, data, config)
         .then(function(rep){
-            console.log('success: ', rep);
             $window.location.href = '/products';
         },
         function(error){
@@ -57,22 +57,60 @@ appModule.controller('ProductController', function($scope, $window, $routeParams
         
         //Get Request to get one product by id
         // http://localhost:8080/products/{id}
+        url = 'http://localhost:8080/products/'+id;
+
+        $http.get(url).then(function(rep){
+            $scope.product= {
+                designation: rep.data.designation,
+                unitPrice: rep.data.unitPrice,
+                availableQuantity: rep.data.availableQuantity
+            };
+            $scope.$apply();
+        }, function(error){
+            console.log(error);
+        });
     };
 
     $scope.updateProduct = function(product) {
+        var data = product;
+        var config = {
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8;'
+            }
+        };
         var id = $routeParams.id;
 
         //PUT request http://localhost:8080/products/{id}
+        var  url = 'http://localhost:8080/products/'+id;
+        $http.put(url, data, config).then(function(rep){
+            $window.location.href = '/products';
+        }, function(error){
+            console.log('fail: ', error);
+        });
     };
 
     $scope.removeModal = function(id){
         $rootScope.selectedId = id;
     }
 
-    $scope.removeProduct = function(id) {
-        var id = $rootScope.selectedId;
+    $scope.removeProduct = function() {
+
+        $scope.delete = {
+            success: false,
+            fail: false
+        };
         
+        var id = $rootScope.selectedId;
         //DELETE request http://localhost:8080/products/{id}
+        var url = 'http://localhost:8080/products/'+id;
+        $http.delete(url).then(function(rep){
+            $scope.delete.success = true;
+            $scope.$apply();
+        }, function(error){
+            $scope.delete.fail = true;
+            $scope.$apply();
+            console.log(error);
+        });
     };
 
     $scope.reload = function(){
